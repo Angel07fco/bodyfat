@@ -1,10 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clasificador de Insectos</title>
+    <title>Formulario de Predicción de Body Fat</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #f9f9f9;
+            color: #333;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 100%; 
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .background-image {
+            background-image: url('{{ url_for('static', filename='images/bodyfat.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.2;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .section-10 {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 10vh;
+            width: 100%;
+            background-color: #f0f4f8;
+        }
+        .section-30 {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 30vh;
+            width: 100%;
+        }
+        .section-60 {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 60vh;
+            width: 100%;
+            background-color: #f0f4f8;
+        }
+        .form-container {
+            width: 50%;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
     <script>
         function clasificarPaciente(event) {
             event.preventDefault();
@@ -15,73 +84,138 @@
             const abdomen= document.getElementById('abdomen').value;
             const biceps= document.getElementById('biceps').value;
 
-            fetch('/predict', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `density=${density}&age=${age}&chest=${chest}&abdomen=${abdomen}&biceps=${biceps}`,
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    document.getElementById('resultado').innerText = 'Error: ' + data.error;
-                } else {
-                    document.getElementById('resultado').innerText = 'El porcentaje de recomendacion del producto es ' + data.prediction;
-                }
-            })
-            .catch(error => {
-                document.getElementById('resultado').innerText = 'Error en la solicitud.';
-                console.error('Error:', error);
-            });
+            if (density !== "" && age !== "" && chest !== "" && abdomen !== ""  && biceps !== "" ) {
+                fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `density=${density}&age=${age}&chest=${chest}&abdomen=${abdomen}&biceps=${biceps}`,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('resultado').innerText = 'Error: ' + data.error;
+                    } else {
+                        document.getElementById('resultado').innerText = 'El porcentaje de masa corporal es de: ' + data.prediction;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('resultado').innerText = 'Error en la solicitud.';
+                    console.error('Error:', error);
+                });
+            } else {
+                alert("Todos los campos son obligatorios")
+            }
         }
     </script>
 </head>
-<body class="">
-    <div class="flex justify-center w-full h-full">
-        <form id="formulario" onsubmit="clasificarPaciente(event)" class="shadow-lg p-4 mt-5">
-            <label for="temperature-slider" class="pl-4 block text-gray-700 text-sm font-bold mb-2">Densidad</label>
-            <input
-                id="density"
-                name="density"
-                step="0.01"
-                class="border rounded px-3 py-2 w-full"
-            >
+<body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
+    <div class="background-image"></div>
 
-            <label for="temperature-slider" class="pl-4 block text-gray-700 text-sm font-bold mb-2">Edad</label>
-            <input
-                id="age"
-                name="age"
-                step="0.01"
-                class="border rounded px-3 py-2 w-full"
-            >
-            <label for="temperature-slider" class="pl-4 block text-gray-700 text-sm font-bold mb-2">Circunferencia del pecho</label>
-            <input
-                id="chest"
-                name="chest"
-                step="0.01"
-                class="border rounded px-3 py-2 w-full"
-            >
-
-            <label for="temperature-slider" class="pl-4 block text-gray-700 text-sm font-bold mb-2">Circunferencia abdominal</label>
-            <input
-                id="abdomen"
-                name="abdomen"
-                step="0.01"
-                class="border rounded px-3 py-2 w-full"
-            >
-
-            <label for="temperature-slider" class="pl-4 block text-gray-700 text-sm font-bold mb-2">Circunferencia del bíceps</label>
-            <input
-                id="biceps"
-                name="biceps"
-                step="0.01"
-                class="border rounded px-3 py-2 w-full"
-            >
-            <button type="submit"  class=" w-full mt-2 shadow-lg p-2 hover:text-blue-300 bg-blue-200 rounded-md ">Enviar</button>
-            <p id="resultado">  </p>
-        </form>
+    <!-- Sección 1: Cards -->
+    <div class="section-10">
+        <div class="flex">
+            <h1 class="font-bold text-2xl">Modelo Predictivo para determinar el porcentaje de masa corporal de una persona</h1>
+        </div>
     </div>
-</body>
 
+    <div class="section-30">
+        <div class="grid grid-cols-5 gap-4 ml-20 mr-20">
+            <div class="bg-white p-4 rounded-lg shadow-lg">
+                <h3 class="text-lg font-bold mb-2">Densidad</h3>
+                <p>La densidad corporal es la relación entre la masa corporal y su volumen.</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-lg">
+                <h3 class="text-lg font-bold mb-2">Edad</h3>
+                <p>La edad del individuo en años.</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-lg">
+                <h3 class="text-lg font-bold mb-2">Circunferencia del Pecho</h3>
+                <p>La circunferencia del pecho en centímetros.</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-lg">
+                <h3 class="text-lg font-bold mb-2">Circunferencia Abdominal</h3>
+                <p>La circunferencia del abdomen en centímetros.</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-lg">
+                <h3 class="text-lg font-bold mb-2">Circunferencia del Bíceps</h3>
+                <p>La circunferencia del bíceps en centímetros, tomada en reposo.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección 2: Formulario -->
+    <div class="section-60">
+        <div class="form-container">
+            <form id="formulario" onsubmit="clasificarPaciente(event)" class="grid grid-cols-2 gap-4">
+                <div class="relative">
+                    <label for="density" class="block text-gray-700 font-bold mb-2">Densidad</label>
+                    <input
+                        id="density"
+                        name="density"
+                        type="number"
+                        step="any"
+                        class="border rounded px-3 py-2 w-full"
+                    >
+                </div>
+
+                <div class="relative">
+                    <label for="age" class="block text-gray-700 font-bold mb-2">Edad</label>
+                    <input
+                        id="age"
+                        name="age"
+                        type="number"
+                        step="1"
+                        class="border rounded px-3 py-2 w-full"
+                    >
+                </div>
+
+                <div class="relative">
+                    <label for="chest" class="block text-gray-700 font-bold mb-2">Circunferencia del Pecho</label>
+                    <input
+                        id="chest"
+                        name="chest"
+                        type="number"
+                        step="0.01"
+                        class="border rounded px-3 py-2 w-full"
+                    >
+                </div>
+
+                <div class="relative">
+                    <label for="abdomen" class="block text-gray-700 font-bold mb-2">Circunferencia Abdominal</label>
+                    <input
+                        id="abdomen"
+                        name="abdomen"
+                        type="number"
+                        step="0.01"
+                        class="border rounded px-3 py-2 w-full"
+                    >
+                </div>
+
+                <div class="relative">
+                    <label for="biceps" class="block text-gray-700 font-bold mb-2">Circunferencia del Bíceps</label>
+                    <input
+                        id="biceps"
+                        name="biceps"
+                        type="number"
+                        step="0.01"
+                        class="border rounded px-3 py-2 w-full"
+                    >
+                </div>
+
+                <button type="submit" class="col-span-2 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700 transition">
+                    Enviar
+                </button>
+            </form>
+            <div class="w-full bg-green-500 mt-5 p-2 flex justify-center items-center">
+                <p id="resultado" class="text-white font-bold"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- <button onclick="window.location.href='/download'" class="mt-4 bg-green-500 text-white p-2 rounded-md hover:bg-green-700 transition">
+        Descargar Dataset
+    </button> -->
+</body>
 </html>
